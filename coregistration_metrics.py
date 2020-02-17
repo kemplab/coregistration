@@ -54,10 +54,10 @@ def mutual_information(p,X,Y):
     X = X.ravel()
     transformed_Y = transformed_Y.ravel()
     # not comparing regions that have zeros in them - actual MALDI and confocal background always > 0
-    #X = X[np.where(transformed_Y != 0)]
-    #transformed_Y = transformed_Y[np.where(transformed_Y != 0)]
-    #transformed_Y = transformed_Y[np.where(X != 0)]
-    #X = X[np.where(X != 0)]
+    X = X[np.where(transformed_Y != 0)]
+    transformed_Y = transformed_Y[np.where(transformed_Y != 0)]
+    transformed_Y = transformed_Y[np.where(X != 0)]
+    X = X[np.where(X != 0)]
     # calculating mutual information
     hgram, _, _ = np.histogram2d(X,transformed_Y,bins=20)
     pxy = hgram / float(np.sum(hgram))
@@ -142,7 +142,7 @@ def plot(image,name):
     norm = colors.BoundaryNorm(bounds, cmap.N)
     image = plt.imshow(image, cmap=cmap, norm=norm)
     plt.colorbar(image, cmap=cmap, norm=norm, boundaries=bounds, ticks=np.around(bounds, decimals=1))
-    plt.savefig(name,dpi=900)
+    plt.savefig(name,dpi=1200,bbox_inches = "tight")
     plt.close()
 
 # overlay cells segmented from the confocal image on the MALDI images, and get the corresponding m/z intensities on 
@@ -172,9 +172,9 @@ def visualize(metric, cells, h, w, name):
 
 # get average distance between cells' centers from a random rectangular sample in the image
 def get_connection_length(X,Y):
-    left = random.randrange(int(np.min(X)), int(0.9*np.max(X)))
-    top = random.randrange(int(np.min(Y)), int(0.9*np.max(Y)))
-    rand_ind = np.where(np.logical_and(np.logical_and(X > left,X < (left + 0.1*np.max(X))), np.logical_and(Y > top, Y < (top + 0.1*np.max(Y)))))
+    left = random.randrange(int(np.min(X)), int(0.75*np.max(X)))
+    top = random.randrange(int(np.min(Y)), int(0.75*np.max(Y)))
+    rand_ind = np.where(np.logical_and(np.logical_and(X > left,X < (left + 0.25*np.max(X))), np.logical_and(Y > top, Y < (top + 0.25*np.max(Y)))))
     X = X[rand_ind]
     Y = Y[rand_ind]
     n = len(X)
@@ -203,12 +203,19 @@ def on_edge(X,Y,i,count,neigh,margin):
     for j in range(count):
         neighX = X[neigh[j]]
         neighY = Y[neigh[j]]
-        a = (selfY - neighY) / (selfX-neighX)
-        b = selfY - a * selfX
+        if selfX == neighX:
+            flag = 1
+        else:
+            a = (selfY - neighY) / (selfX-neighX)
+            b = selfY - a * selfX
+            flag = 0
         s = 0
         for k in range(count):
-            if k == j: continue 
-            s = s + np.sign(Y[neigh[k]]-a*X[neigh[k]]-b) 
+            if k == j: continue
+            if flag == 0:
+                s = s + np.sign(Y[neigh[k]]-a*X[neigh[k]]-b) 
+            else:
+                s = s + np.sign(Y[neigh[k]] - selfY)
         if np.abs(s) == count: return 1
         else: edge = 0
             
