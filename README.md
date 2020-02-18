@@ -25,6 +25,7 @@ There is no need to download them in order for the scripts to work.
 3. To create ion images separately run "ion_maker.py". It uses "mykmeans.py" and "imzmlparser.py", so keep them in the same folder as the "ion_maker.py".
 
     Input: imzML file from the MALDI run
+    
     Output: a folder with ion images
     
 The code uses Python 3.7.6 and conda 4.8.2 with opencv 3.4.2, scikit-image 0.16.2, scikit-learn 0.22.1, scipy 1.4.1, numpy 1.18.1 
