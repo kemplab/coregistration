@@ -28,3 +28,5 @@ There is no need to download them in order for the scripts to work.
     Output: a folder with ion images
     
 The code uses Python 3.7.6 and conda 4.8.2 with opencv 3.4.2, scikit-image 0.16.2, scikit-learn 0.22.1, scipy 1.4.1, numpy 1.18.1 
+
+For any issues with the code write to anikitina3@gatech.edu
