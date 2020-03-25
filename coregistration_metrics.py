@@ -9,6 +9,13 @@ import cv2
 from sklearn.cluster import KMeans, DBSCAN
 import random
 
+def stretch_contrast(image,bits):
+    mx = np.max(image)
+    mn = np.min(image[np.where(image!=0)])
+    image = image-np.ones(image.shape)*mn
+    multiplier = np.power(2,bits)/(mx-mn)
+    image = image*multiplier
+    return image
 # transform image given X shift, Y shift, angle of rotation (radians) and scaling factor
 def transform_image(X,theta,shiftX,shiftY,scale): 
     (height, width) = X.shape[:2]
@@ -83,28 +90,7 @@ def crop_zeros(image):
         s = np.sum(image[:,i])
         if s > 0:
             right = i
-            if left == 0: left = i  
-    # crop out zeros in corners that appeared due to rotation
-    delta_left, delta_right, delta_top, delta_bottom = 0,0,0,0
-    while image[top,left+delta_left] == 0: delta_left += 1
-    while image[top+delta_top,left] == 0: delta_top += 1
-    if delta_top < delta_left: top += delta_top
-    else: left += delta_left
-    delta_left, delta_top = 0,0 
-    while image[bottom,left+delta_left] == 0: delta_left += 1
-    while image[bottom+delta_bottom,left] == 0: delta_bottom -= 1        
-    if -delta_bottom < delta_left: bottom += delta_bottom
-    else: left += delta_left  
-    delta_bottom = 0    
-    while image[bottom,right+delta_right] == 0: delta_right -= 1
-    while image[bottom+delta_bottom, right] == 0: delta_bottom -= 1        
-    if delta_bottom > delta_right: bottom += delta_bottom
-    else: right += delta_right 
-    delta_right = 0
-    while image[top,right+delta_right] == 0: delta_right -= 1
-    while image[top+delta_top,right] == 0: delta_top += 1        
-    if delta_top < -delta_right: top += delta_top
-    else: right += delta_right   
+            if left == 0: left = i   
     # return crop boundaries    
     return [top,bottom,left,right]
          
@@ -138,7 +124,7 @@ def plot(image,name):
     m = np.max(image)
     cmap = colors.ListedColormap(['white','darkblue','blue','cornflowerblue',
                                   'cyan','aquamarine','lime','greenyellow','yellow','gold','orange','red','brown'])
-    bounds=[0,0.00001,m/12,m/6,m/4,m/3,m/2.4,m/2,0.58*m,m/1.5,0.75*m,m/1.2,0.91*m,m]
+    bounds=[0,1e-9,m/12,m/6,m/4,m/3,m/2.4,m/2,0.58*m,m/1.5,0.75*m,m/1.2,0.91*m,m]
     norm = colors.BoundaryNorm(bounds, cmap.N)
     image = plt.imshow(image, cmap=cmap, norm=norm)
     plt.colorbar(image, cmap=cmap, norm=norm, boundaries=bounds, ticks=np.around(bounds, decimals=1))
