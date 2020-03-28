@@ -186,26 +186,16 @@ def on_edge(X,Y,i,count,neigh,margin):
     # cells closer to the edge of the image than the given margin are considered "on-colony"
     if selfX < margin or selfY < margin or selfX > max(X)-margin or selfY > max(Y)-margin: return 0
     # output 0 means cell is off-edge, 1 - on the edge
-    for j in range(count):
-        neighX = X[neigh[j]]
-        neighY = Y[neigh[j]]
-        if selfX == neighX:
-            flag = 1
-        else:
-            a = (selfY - neighY) / (selfX-neighX)
-            b = selfY - a * selfX
-            flag = 0
-        s = 0
-        for k in range(count):
-            if k == j: continue
-            if flag == 0:
-                s = s + np.sign(Y[neigh[k]]-a*X[neigh[k]]-b) 
-            else:
-                s = s + np.sign(Y[neigh[k]] - selfY)
-        if np.abs(s) == count: return 1
-        else: edge = 0
-            
-    return edge
+    quaters = [0,0,0,0]
+    for j in neigh:
+        if X[j] > selfX and Y[j] > selfY: quaters[0] = 1
+        if X[j] > selfX and Y[j] < selfY: quaters[1] = 1    
+        if X[j] < selfX and Y[j] < selfY: quaters[2] = 1
+        if X[j] < selfX and Y[j] > selfY: quaters[3] = 1  
+    if quaters[0]*quaters[1]*quaters[2]*quaters[3] == 1:
+        return 0
+    else:
+        return 1
 
 # calculating distance from the edge of the colony for a given cell
 def edgeDistance(X,Y,edge,i):
